@@ -1,0 +1,26 @@
+- cmd: brew install ghq
+  when: 1524832202
+- cmd: docker --version
+  when: 1524832202
+- cmd: ghq get https://github.com/ykpythemind/dotfiles.git
+  when: 1524832202
+- cmd: brew doctor
+  when: 1524832202
+- cmd: sh build.sh 
+  when: 1524832202
+- cmd: chsh
+  when: 1524832202
+- cmd: sudo vim /etc/shells
+  when: 1524832202
+- cmd: man curl
+  when: 1524875441
+- cmd: sh init.sh 
+  when: 1524875693
+  paths:
+    - init.sh
+- cmd: vim .zshrc
+  when: 1524875832
+  paths:
+    - .zshrc
+- cmd: vim .zshenv 
+  when: 1524875889
