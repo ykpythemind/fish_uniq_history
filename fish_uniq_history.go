@@ -31,11 +31,9 @@ func Uniq(historyList *[]string) (uniqedList []string) {
 			continue
 		}
 		mapList[v] = true
+		uniqedList = append(uniqedList, v)
 	}
 
-	for k := range mapList {
-		uniqedList = append(uniqedList, k)
-	}
 	return
 }
 
