@@ -9,23 +9,23 @@ import (
 )
 
 func main() {
-	ls := Read(historyFile())
-	uniqedList := Uniq(&ls)
-	// fmt.Println(strings.Join(ls, "\n"))
-	Out(&uniqedList)
+	commandList := Read(historyFile())
+	uniqedList := Uniq(commandList)
+	Reverse(uniqedList)
+	Out(uniqedList)
 }
 
 func historyFile() string {
 	return filepath.Join(os.Getenv("HOME"), ".local", "share", "fish", "fish_history")
 }
 
-func Out(historyList *[]string) {
-	fmt.Fprint(os.Stdout, strings.Join(*historyList, "\n"))
+func Out(historyList []string) {
+	fmt.Fprint(os.Stdout, strings.Join(historyList, "\n"))
 }
 
-func Uniq(historyList *[]string) (uniqedList []string) {
+func Uniq(historyList []string) (uniqedList []string) {
 	mapList := make(map[string]bool)
-	for _, v := range *historyList {
+	for _, v := range historyList {
 		_, ok := mapList[v]
 		if ok {
 			continue
@@ -33,10 +33,13 @@ func Uniq(historyList *[]string) (uniqedList []string) {
 		mapList[v] = true
 		uniqedList = append(uniqedList, v)
 	}
-	for i, j := 0, len(uniqedList)-1; i < j; i, j = i+1, j-1 {
-		uniqedList[i], uniqedList[j] = uniqedList[j], uniqedList[i]
-	}
 	return
+}
+
+func Reverse(list []string) {
+	for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+		list[i], list[j] = list[j], list[i]
+	}
 }
 
 func Read(filePath string) (historyList []string) {

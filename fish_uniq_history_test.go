@@ -26,3 +26,25 @@ func BenchmarkRead(b *testing.B) {
 	}
 	b.StopTimer()
 }
+
+func TestUniq(t *testing.T) {
+	dupList := []string{"a", "aaa", "a", "piyo", "hoge", "hoge", "a", "piyo2", "piyo", "fuga"}
+	expectList := []string{"a", "aaa", "piyo", "hoge", "piyo2", "fuga"}
+	uniqedList := Uniq(dupList)
+	for i := 0; i < len(expectList)-1; i++ {
+		if expectList[i] != uniqedList[i] {
+			t.Errorf("failed: expect %s, but got %s", expectList[i], uniqedList[i])
+		}
+	}
+}
+
+func TestReverse(t *testing.T) {
+	list := []string{"1", "2", "4", "5", "3"}
+	expectList := []string{"3", "5", "4", "2", "1"}
+	Reverse(list)
+	for i := 0; i < len(expectList)-1; i++ {
+		if expectList[i] != list[i] {
+			t.Errorf("failed: expect %s, but got %s", expectList[i], list[i])
+		}
+	}
+}
