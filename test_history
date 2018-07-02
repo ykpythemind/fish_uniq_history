@@ -8,7 +8,7 @@
   when: 1524832202
 - cmd: sh build.sh 
   when: 1524832202
-- cmd: chsh
+- cmd: docker --version
   when: 1524832202
 - cmd: sudo vim /etc/shells
   when: 1524832202
