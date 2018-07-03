@@ -27,6 +27,16 @@ func BenchmarkRead(b *testing.B) {
 	b.StopTimer()
 }
 
+func TestMakeList(t *testing.T) {
+	var expect = [11]string{"vim .zshenv ", "vim .zshrc", "sh init.sh ", "man curl", "sudo vim /etc/shells", "docker --version", "sh build.sh ", "brew doctor", "ghq get https://github.com/ykpythemind/dotfiles.git", "brew install ghq"}
+	list := MakeList(testFile)
+	for i := 0; i < len(list); i++ {
+		if expect[i] != list[i] {
+			t.Errorf("failed: expect %s, but got %s", expect[i], list[i])
+		}
+	}
+}
+
 func TestUniq(t *testing.T) {
 	dupList := []string{"a", "aaa", "a", "piyo", "hoge", "hoge", "a", "piyo2", "piyo", "fuga"}
 	expectList := []string{"a", "aaa", "piyo", "hoge", "piyo2", "fuga"}

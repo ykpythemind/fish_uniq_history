@@ -9,10 +9,15 @@ import (
 )
 
 func main() {
-	commandList := Read(historyFile())
+	list := MakeList(historyFile())
+	fmt.Fprint(os.Stdout, strings.Join(list, "\n"))
+}
+
+func MakeList(historyFile string) []string {
+	commandList := Read(historyFile)
 	Reverse(commandList)
 	uniqedList := Uniq(commandList)
-	fmt.Fprint(os.Stdout, strings.Join(uniqedList, "\n"))
+	return uniqedList
 }
 
 func historyFile() string {
