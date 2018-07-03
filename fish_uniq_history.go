@@ -10,17 +10,13 @@ import (
 
 func main() {
 	commandList := Read(historyFile())
+	Reverse(commandList)
 	uniqedList := Uniq(commandList)
-	Reverse(uniqedList)
-	Out(uniqedList)
+	fmt.Fprint(os.Stdout, strings.Join(uniqedList, "\n"))
 }
 
 func historyFile() string {
 	return filepath.Join(os.Getenv("HOME"), ".local", "share", "fish", "fish_history")
-}
-
-func Out(historyList []string) {
-	fmt.Fprint(os.Stdout, strings.Join(historyList, "\n"))
 }
 
 func Uniq(historyList []string) (uniqedList []string) {
