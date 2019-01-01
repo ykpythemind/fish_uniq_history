@@ -1,0 +1,26 @@
+- cmd: cmd1
+  when: 1524832202
+- cmd: cmd2
+  when: 1524832202
+- cmd: cmd3
+  when: 1524832202
+- cmd: cmd4
+  when: 1524832202
+- cmd: cmd5
+  when: 1524832202
+- cmd: cmd2
+  when: 1524832202
+- cmd: cmd6
+  when: 1524832202
+- cmd: cmd7
+  when: 1524875441
+- cmd: cmd2
+  when: 1524875693
+  paths:
+    - init.sh
+- cmd: cmd3
+  when: 1524875832
+  paths:
+    - .zshrc
+- cmd: cmd2
+  when: 1524875889

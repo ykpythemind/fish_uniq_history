@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-var testFile = "test_history"
+var testFile = "testdata/test_history"
 
-var expectCommandList = [12]string{"brew install ghq", "docker --version", "ghq get https://github.com/ykpythemind/dotfiles.git", "brew doctor", "sh build.sh ", "docker --version", "sudo vim /etc/shells", "man curl", "sh init.sh ", "vim .zshrc", "vim .zshenv "}
+var expectCommandList = [12]string{"cmd1", "cmd2", "cmd3", "cmd4", "cmd5", "cmd2", "cmd6", "cmd7", "cmd2", "cmd3", "cmd2"}
 
 func TestRead(t *testing.T) {
 	list := Read(testFile)
@@ -28,7 +28,7 @@ func BenchmarkRead(b *testing.B) {
 }
 
 func TestMakeList(t *testing.T) {
-	var expect = [11]string{"vim .zshenv ", "vim .zshrc", "sh init.sh ", "man curl", "sudo vim /etc/shells", "docker --version", "sh build.sh ", "brew doctor", "ghq get https://github.com/ykpythemind/dotfiles.git", "brew install ghq"}
+	var expect = [7]string{"cmd2", "cmd3", "cmd7", "cmd6", "cmd5", "cmd4", "cmd1"}
 	list := MakeList(testFile)
 	for i := 0; i < len(list); i++ {
 		if expect[i] != list[i] {
