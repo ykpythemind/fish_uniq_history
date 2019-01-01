@@ -3,55 +3,58 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
 func main() {
-	list := MakeList(historyFile())
+	file, err := os.Open(historyFilePath())
+	if err != nil {
+		log.Fatalf("[Error] %v\n", err)
+	}
+	defer file.Close()
+	list := makeUniqedHistory(file)
 	fmt.Fprint(os.Stdout, strings.Join(list, "\n"))
 }
 
-func MakeList(historyFile string) []string {
-	commandList := Read(historyFile)
-	Reverse(commandList)
-	uniqedList := Uniq(commandList)
+func makeUniqedHistory(reader io.Reader) []string {
+	commandList := read(reader)
+	reverse(commandList)
+	uniqedList := uniq(commandList)
 	return uniqedList
 }
 
-func historyFile() string {
+func historyFilePath() string {
 	return filepath.Join(os.Getenv("HOME"), ".local", "share", "fish", "fish_history")
 }
 
-func Uniq(historyList []string) (uniqedList []string) {
-	mapList := make(map[string]bool)
-	for _, v := range historyList {
-		_, ok := mapList[v]
+func uniq(list []string) []string {
+	uniqedList := make([]string, len(list))
+	m := make(map[string]bool)
+	var i int
+	for _, v := range list {
+		_, ok := m[v]
 		if ok {
 			continue
 		}
-		mapList[v] = true
-		uniqedList = append(uniqedList, v)
+		m[v] = true
+		uniqedList[i] = v
+		i++
 	}
-	return
+	return uniqedList[:i]
 }
 
-func Reverse(list []string) {
+func reverse(list []string) {
 	for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
 		list[i], list[j] = list[j], list[i]
 	}
 }
 
-func Read(filePath string) (historyList []string) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[Error] %v\n", err)
-		os.Exit(1)
-	}
-	defer file.Close()
-
-	sc := bufio.NewScanner(file)
+func read(reader io.Reader) (historyList []string) {
+	sc := bufio.NewScanner(reader)
 
 	for i := 1; sc.Scan(); i++ {
 		if err := sc.Err(); err != nil {
