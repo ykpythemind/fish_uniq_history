@@ -16,15 +16,14 @@ func main() {
 		log.Fatalf("[Error] %v\n", err)
 	}
 	defer file.Close()
-	list := makeUniqedHistory(file)
-	fmt.Fprint(os.Stdout, strings.Join(list, "\n"))
+	fmt.Fprint(os.Stdout, makeUniqedHistory(file))
 }
 
-func makeUniqedHistory(reader io.Reader) []string {
+func makeUniqedHistory(reader io.Reader) string {
 	commandList := read(reader)
 	reverse(commandList)
 	uniqedList := uniq(commandList)
-	return uniqedList
+	return strings.Join(uniqedList, "\n")
 }
 
 func historyFilePath() string {
@@ -53,21 +52,25 @@ func reverse(list []string) {
 	}
 }
 
-func read(reader io.Reader) (historyList []string) {
-	sc := bufio.NewScanner(reader)
+var prefix = []byte("-")
 
-	for i := 1; sc.Scan(); i++ {
+func read(reader io.Reader) []string {
+	sc := bufio.NewScanner(reader)
+	var historyList []string
+
+	for sc.Scan() {
 		if err := sc.Err(); err != nil {
 			break
 		}
 
 		bytes := sc.Bytes()
-		if string(bytes[:1]) != "-" {
+		if bytes[0] != prefix[0] {
 			continue
 		}
 
+		// https://github.com/fish-shell/fish-shell/blob/63e70d601d449b0b1448f63f58e2db25576d1822/src/history.cpp#L610
 		commandStr := bytes[7:] // "- cmd : hogehoge"
 		historyList = append(historyList, string(commandStr))
 	}
-	return
+	return historyList
 }

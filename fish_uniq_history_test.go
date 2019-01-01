@@ -6,7 +6,10 @@ import (
 	"testing"
 )
 
-var testFile = "testdata/test_history"
+var (
+	testFile     = "testdata/history"
+	testLongFile = "testdata/long_history"
+)
 
 func TestRead(t *testing.T) {
 	file, err := os.Open(testFile)
@@ -24,6 +27,20 @@ func TestRead(t *testing.T) {
 			t.Errorf("failed: expected %s, but got %s", expect, actual)
 		}
 	}
+}
+
+func BenchmarkReadLong(b *testing.B) {
+	file, err := os.Open(testLongFile)
+	if err != nil {
+		log.Fatalf("[Error] %v\n", err)
+	}
+	defer file.Close()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		read(file)
+	}
+	b.StopTimer()
 }
 
 func BenchmarkRead(b *testing.B) {
@@ -47,12 +64,10 @@ func TestMakeUniqedHistory(t *testing.T) {
 	}
 	defer file.Close()
 
-	var expect = []string{"cmd2", "cmd3", "cmd7", "cmd6", "cmd5", "cmd4", "cmd1"}
+	var expect = "cmd2\ncmd3\ncmd7\ncmd6\ncmd5\ncmd4\ncmd1"
 	list := makeUniqedHistory(file)
-	for i := 0; i < len(list); i++ {
-		if expect[i] != list[i] {
-			t.Errorf("failed: expect %s, but got %s", expect[i], list[i])
-		}
+	if expect != list {
+		t.Errorf("failed: expect %s, but got %s", expect, list)
 	}
 }
 
