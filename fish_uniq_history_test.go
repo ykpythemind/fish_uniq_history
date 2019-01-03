@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -38,10 +40,9 @@ func BenchmarkReadLong(b *testing.B) {
 	}
 	defer file.Close()
 
-	h := newHistory(file)
-
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		h := newHistory(file)
 		h.read()
 	}
 	b.StopTimer()
@@ -54,16 +55,33 @@ func BenchmarkRead(b *testing.B) {
 	}
 	defer file.Close()
 
-	h := newHistory(file)
-
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		h := newHistory(file)
 		h.read()
 	}
 	b.StopTimer()
 }
 
-func TestMakeUniqedHistory(t *testing.T) {
+func BenchmarkOutput(b *testing.B) {
+	file, err := os.Open(testFile)
+	if err != nil {
+		log.Fatalf("[Error] %v\n", err)
+	}
+	defer file.Close()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		h := newHistory(file)
+		err = h.output(ioutil.Discard)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+	b.StopTimer()
+}
+
+func TestOutput(t *testing.T) {
 	file, err := os.Open(testFile)
 	if err != nil {
 		log.Fatalf("[Error] %v\n", err)
@@ -71,32 +89,43 @@ func TestMakeUniqedHistory(t *testing.T) {
 	defer file.Close()
 
 	h := newHistory(file)
+	b := new(bytes.Buffer) // A Buffer needs no initialization.
+	err = h.output(b)
+	if err != nil {
+		t.Error(err)
+	}
 
-	var expect = "cmd2\ncmd3\ncmd7\ncmd6\ncmd5\ncmd4\ncmd1"
-	list := h.makeUniqedHistory()
-	if expect != list {
-		t.Errorf("failed: expect %s, but got %s", expect, list)
+	expect := "cmd2\ncmd3\ncmd7\ncmd6\ncmd5\ncmd4\ncmd1"
+	if b.String() != expect {
+		t.Errorf("failed: expect: %s, but got %s", expect, b.String())
 	}
 }
 
-func TestUniq(t *testing.T) {
-	dupList := []string{"a", "aaa", "a", "piyo", "hoge", "hoge", "a", "piyo2", "piyo", "fuga"}
-	expectList := []string{"a", "aaa", "piyo", "hoge", "piyo2", "fuga"}
-	uniqedList := uniq(dupList)
-	for i := 0; i < len(expectList); i++ {
-		if expectList[i] != uniqedList[i] {
-			t.Errorf("failed: expect %s, but got %s", expectList[i], uniqedList[i])
+func TestMakeUniqList(t *testing.T) {
+	file, err := os.Open(testFile)
+	if err != nil {
+		log.Fatalf("[Error] %v\n", err)
+	}
+	defer file.Close()
+
+	h := newHistory(file)
+	list := h.makeUniqedList()
+
+	var expect = []string{"cmd2", "cmd3", "cmd7", "cmd6", "cmd5", "cmd4", "cmd1"}
+	for i, v := range expect {
+		if v != list[i] {
+			t.Errorf("failed: expect %s, but got %s", v, list[i])
 		}
 	}
 }
 
-func TestReverse(t *testing.T) {
-	list := []string{"1", "2", "4", "a", "5", "3"}
-	expectList := []string{"3", "5", "a", "4", "2", "1"}
-	reverse(list)
+func TestReverseUniq(t *testing.T) {
+	dupList := []string{"a", "aaa", "a", "piyo", "hoge", "hoge", "a", "piyo2", "piyo", "fuga"}
+	expectList := []string{"fuga", "piyo", "piyo2", "a", "hoge", "aaa"}
+	newList := reverseUniq(dupList)
 	for i := 0; i < len(expectList); i++ {
-		if expectList[i] != list[i] {
-			t.Errorf("failed: expect %s, but got %s", expectList[i], list[i])
+		if expectList[i] != newList[i] {
+			t.Errorf("failed: expect %s, but got %s", expectList[i], newList[i])
 		}
 	}
 }

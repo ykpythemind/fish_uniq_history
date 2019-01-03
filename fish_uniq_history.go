@@ -2,12 +2,10 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type history struct {
@@ -23,52 +21,68 @@ func newHistory(reader io.Reader) *history {
 func main() {
 	file, err := os.Open(historyFilePath())
 	if err != nil {
-		log.Fatalf("[Error] %v\n", err)
+		log.Fatal(err)
 	}
 	defer file.Close()
 	h := newHistory(file)
 
-	fmt.Fprint(os.Stdout, h.makeUniqedHistory())
+	err = h.output(os.Stdout)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (h *history) makeUniqedHistory() string {
-	commandList := h.read()
-	reverse(commandList)
-	uniqedList := uniq(commandList)
-	return strings.Join(uniqedList, "\n")
+func (h *history) output(w io.Writer) error {
+	list := h.makeUniqedList()
+	last := len(list)
+	for i, s := range list {
+		s := s
+		if i != last-1 {
+			s = s + "\n"
+		}
+		_, err := w.Write([]byte(s))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (h *history) makeUniqedList() []string {
+	list := h.read()
+	return reverseUniq(list)
 }
 
 func historyFilePath() string {
 	return filepath.Join(os.Getenv("HOME"), ".local", "share", "fish", "fish_history")
 }
 
-func uniq(list []string) []string {
+func reverseUniq(list []string) []string {
 	uniqedList := make([]string, len(list))
-	m := make(map[string]bool)
-	var i int
-	for _, v := range list {
+
+	m := make(map[string]struct{})
+
+	// reverse reading
+	var j int
+	for i := len(list) - 1; i >= 0; i-- {
+		v := list[i]
 		_, ok := m[v]
 		if ok {
 			continue
 		}
-		m[v] = true
-		uniqedList[i] = v
-		i++
+		m[v] = struct{}{}
+		uniqedList[j] = v
+		j++
 	}
-	return uniqedList[:i]
-}
 
-func reverse(list []string) {
-	for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
-		list[i], list[j] = list[j], list[i]
-	}
+	return uniqedList[:j]
 }
 
 var prefix = []byte("-")
 
 func (h *history) read() []string {
 	sc := bufio.NewScanner(h.reader)
-	var historyList []string
+	var list []string
 
 	for sc.Scan() {
 		if err := sc.Err(); err != nil {
@@ -81,8 +95,8 @@ func (h *history) read() []string {
 		}
 
 		// https://github.com/fish-shell/fish-shell/blob/63e70d601d449b0b1448f63f58e2db25576d1822/src/history.cpp#L610
-		commandStr := bytes[7:] // "- cmd : hogehoge"
-		historyList = append(historyList, string(commandStr))
+		command := string(bytes[7:]) // "- cmd : hogehoge"
+		list = append(list, command)
 	}
-	return historyList
+	return list
 }
