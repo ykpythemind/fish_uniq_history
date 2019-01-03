@@ -78,8 +78,6 @@ func reverseUniq(list []string) []string {
 	return uniqedList[:j]
 }
 
-var prefix = []byte("-")
-
 func (h *history) read() []string {
 	sc := bufio.NewScanner(h.reader)
 	var list []string
@@ -90,7 +88,7 @@ func (h *history) read() []string {
 		}
 
 		bytes := sc.Bytes()
-		if bytes[0] != prefix[0] {
+		if string(bytes[0]) != "-" {
 			continue
 		}
 
