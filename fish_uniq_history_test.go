@@ -17,7 +17,9 @@ func TestRead(t *testing.T) {
 		log.Fatalf("[Error] %v\n", err)
 	}
 	defer file.Close()
-	list := read(file)
+
+	h := newHistory(file)
+	list := h.read()
 
 	expectCommandList := []string{"cmd1", "cmd2", "cmd3", "cmd4", "cmd5", "cmd2", "cmd6", "cmd7", "cmd2", "cmd3", "cmd2"}
 
@@ -36,9 +38,11 @@ func BenchmarkReadLong(b *testing.B) {
 	}
 	defer file.Close()
 
+	h := newHistory(file)
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read(file)
+		h.read()
 	}
 	b.StopTimer()
 }
@@ -50,9 +54,11 @@ func BenchmarkRead(b *testing.B) {
 	}
 	defer file.Close()
 
+	h := newHistory(file)
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read(file)
+		h.read()
 	}
 	b.StopTimer()
 }
@@ -64,8 +70,10 @@ func TestMakeUniqedHistory(t *testing.T) {
 	}
 	defer file.Close()
 
+	h := newHistory(file)
+
 	var expect = "cmd2\ncmd3\ncmd7\ncmd6\ncmd5\ncmd4\ncmd1"
-	list := makeUniqedHistory(file)
+	list := h.makeUniqedHistory()
 	if expect != list {
 		t.Errorf("failed: expect %s, but got %s", expect, list)
 	}

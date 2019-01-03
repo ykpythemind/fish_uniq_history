@@ -10,17 +10,29 @@ import (
 	"strings"
 )
 
+type history struct {
+	reader io.Reader
+}
+
+func newHistory(reader io.Reader) *history {
+	return &history{
+		reader: reader,
+	}
+}
+
 func main() {
 	file, err := os.Open(historyFilePath())
 	if err != nil {
 		log.Fatalf("[Error] %v\n", err)
 	}
 	defer file.Close()
-	fmt.Fprint(os.Stdout, makeUniqedHistory(file))
+	h := newHistory(file)
+
+	fmt.Fprint(os.Stdout, h.makeUniqedHistory())
 }
 
-func makeUniqedHistory(reader io.Reader) string {
-	commandList := read(reader)
+func (h *history) makeUniqedHistory() string {
+	commandList := h.read()
 	reverse(commandList)
 	uniqedList := uniq(commandList)
 	return strings.Join(uniqedList, "\n")
@@ -54,8 +66,8 @@ func reverse(list []string) {
 
 var prefix = []byte("-")
 
-func read(reader io.Reader) []string {
-	sc := bufio.NewScanner(reader)
+func (h *history) read() []string {
+	sc := bufio.NewScanner(h.reader)
 	var historyList []string
 
 	for sc.Scan() {
